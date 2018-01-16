@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="app">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <link href="https://fonts.googleapis.com/css?family=Imprima" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Delius+Swash+Caps" rel="stylesheet">
+  <link rel="stylesheet" href="css/admin.css">
+  <link rel="icon" type="png" href="https://vignette.wikia.nocookie.net/paradise-bay/images/f/fb/Pineapple.png">
+  <script type="text/javascript" src="js/app.js"></script>
+  <script type="text/javascript" src="js/controllers/AdminController.js"></script>
+  <script type="text/javascript" src="js/services/SuperService.js"></script>
+  <script type="text/javascript" src="js/filters/filters.js"></script>
+  <script type="text/javascript" src="js/directives/productWrapper.js"></script>
+  <script type="text/javascript" src="js/directives/category.js"></script>
+  <script type="text/javascript" src="js/directives/inputSearch.js"></script>
+</head>
+<body ng-controller="adminController">
+  <div class="loader" ng-if="!adminAuth"></div>
+  <section ng-show="adminAuth" ng-init="fetchCategories()">
+      <ul class="navigation-bar">
+        <li><a href="" id="logo">Fresh Direct</a></li>
+        <li><input-search data="products" visible="true"></input-search></li>
+        <li><form action="/logout" method="get"><button type="submit"><i class="fa fa-lock"></i>Log Out</button></form></li>
+      </ul>
+       <div class="navbar">
+        <div class="contaier">
+          <div class="navbar-header">
+            <div class="toggle nav-btn" id="nav-icon2">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+          </div>
+          <ul id="buttons-wrapper" class="nav navcollaps"> 
+            <category-btn ng-repeat="category in categories" category="category" clicky="fetchProductsByCategory" class="directive"></category-btn>
+          </ul>
+        </div>
+      </div>
+    <div class="main-container">
+      <form name="form" novalidate>
+        <h4>Add new product <span class="glyphicon glyphicon-plus" ng-click="openFormScreen()"></span></h4>
+        <div class="form-container" ng-show="screenOpen">
+          <div class="form-group">
+            <input type="text" id="name" ng-model="name" placeholder="product name" name="name" required>
+            <p ng-if="form.name.$dirty && form.name.$invalid">Can't be blank</p>
+          </div>
+          <div class="form-group">
+            <input type="number" id="price" ng-model="price" placeholder="product price" name="price" step="0.1" required>
+            <p ng-if="form.price.$dirty && form.price.$invalid">Can't be blank</p>
+          </div>
+          <div ng-hide="updateMode" class="form-group">
+            <select ng-model="category" required name="category">
+              <option value="" disabled selected>Select Category</option>
+              <option ng-repeat="category in categories" value="{{category._id}}">{{category.name | capitalize}}</option>
+              <option value="new">Create new category</option>
+            </select>
+            <p ng-if="form.category.$touched && form.category.$invalid">Can't be blank</p>
+          </div>
+          <div ng-show="category == 'new'" class="form-group">
+            <input type="text" id="ctg" ng-model="ctg" placeholder="New category name">
+            <button class="btn btnPush" ng-click="addCtg()">Add</button>
+            <p ng-if="err" class="err">{{err}}</p>
+          </div>
+          <div class="form-group">
+            <input type="file" id="myfile" name="image" ng-model="file" required>
+          </div>
+          <div class="img-selected"><img src=""></div>
+          <p ng-if="imgErr" class="err">{{imgErr}}</p>
+          <button ng-hide="updateMode" class="btn btnPush" id="uploadBtn" ng-click="addProduct()" ng-disabled="form.name.$invalid || form.price.$invalid || form.category.$invalid">Add product</button>
+          <button ng-show="updateMode" class="btn btnPush" id="uploadBtn" ng-click="updateProduct()" ng-disabled="form.name.$invalid || form.price.$invalid">Update product</button>
+        </div>
+      </form>
+      <div class="products-container">
+        <product-wrap ng-repeat="product in products" product-data="product" label="'edit'" clicky="editProduct"></product-wrap>
+      </div>
+    </div>
+  </section>
+</body>
+</html>
+

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="app">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <link href="https://fonts.googleapis.com/css?family=Imprima" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Mouse+Memoirs" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Delius+Swash+Caps" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="css/shopping.css">
+  <link rel="icon" type="png" href="https://vignette.wikia.nocookie.net/paradise-bay/images/f/fb/Pineapple.png">
+  <script type="text/javascript" src="js/app.js"></script>
+  <script type="text/javascript" src="js/controllers/SuperController.js"></script>
+  <script type="text/javascript" src="js/services/SuperService.js"></script>
+  <script type="text/javascript" src="js/filters/filters.js"></script>
+  <script type="text/javascript" src="js/directives/productWrapper.js"></script>
+  <script type="text/javascript" src="js/directives/productCart.js"></script>
+  <script type="text/javascript" src="js/directives/category.js"></script>
+  <script type="text/javascript" src="js/directives/inputSearch.js"></script>
+  <script type="text/javascript" src="js/directives/popup.js"></script>
+  <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.9.0/moment-with-locales.min.js"></script>
+  <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/3.1.3/js/bootstrap-datetimepicker.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/3.1.3/css/bootstrap-datetimepicker.min.css">
+</head>
+<body ng-controller="SuperController">
+    <div class="loader" ng-if="!authorized"></div>
+    <div ng-show="authorized">
+      <div class="nav">
+        <div class="nav-header">
+          <div class="nav-title" id="logo">Fresh Direct</div>
+        </div>
+        <div id="nav-icon1" class="nav-btn">
+          <label for="nav-check">
+            <span></span>
+            <span></span>
+            <span></span>
+          </label>
+        </div>
+        <input type="checkbox" id="nav-check">
+        <ul class="nav-links">
+          <li><input-search data='products' visible="shoppingStep"></input-search></li>
+          <li class="cart-toggle" ng-click="toggleCart()">
+            <div class="icon-cart" style="clear: left; float: left">
+              <div class="cart-line-1" style="background-color: white"></div>
+              <div class="cart-line-2" style="background-color: white"></div>
+              <div class="cart-line-3" style="background-color: white"></div>
+              <div class="cart-wheel" style="background-color: white"></div>
+            </div>
+            <span class="badge" ng-if="cart.items">{{cart.items.length}}</span>
+            <span class="badge" ng-if="!cart.items">0</span>
+          </li>
+          <li id="username"><i class="fa fa-user-o"></i>{{fullName | capitalize}}</li>
+          <li><form action="/logout" method="get"><button type="submit"><i class="fa fa-lock"></i>Log out</button></form></li>
+        </ul>
+      </div>
+      <div class="navbar"  ng-show="shoppingStep">
+        <div class="contaier">
+          <div class="navbar-header">
+            <div class="toggle nav-btn" id="nav-icon2">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+          </div>
+          <ul id="buttons-wrapper" class="nav navcollaps"> 
+            <category-btn ng-repeat="category in categories" category="category" clicky="fetchProductsByCategory" class="directive"></category-btn>
+          </ul>
+        </div>
+      </div>
+      <div class="container-fluid main">
+         <div class="cart opened">
+            <div class="header">
+              <h3>My cart</h3>
+              <button ng-if="!shoppingStep" ng-click="toggleSteps()" class="btn btnBack"><i class="fa fa-arrow-left" aria-hidden="true"></i> Back</button>
+              <button type="button" class="btnTrash" ng-if="shoppingStep" ng-click="emptyCart()">
+                <span class="trash">
+                  <span></span>
+                  <i></i>
+                </span>
+              </button>
+               <div class="close-cart" ng-click="toggleCart()">X</div>
+            </div>
+            <ul class="items-wrapper">
+               <li ng-show="!shoppingStep"><input type="text" placeholder="Search in your cart..." ng-keyup="searchInReceipt()" ng-model="pname"></li>
+               <cart-product ng-repeat="product in cart.items" data="product" step="shoppingStep" update-quantity="updateCart" remove-product="removeProduct"></cart-product>
+               <h3 ng-if="!cart">The cart is empty. Click on the categories above and fill it up with products :)</h3>
+            </ul>
+            <div class="footer">
+               <div>Subtotal: <span ng-if="cart.totalPrice">{{cart.totalPrice}}</span><span ng-if="!cart.totalPrice">0</span> <i class="fa fa-usd"></i></div>
+               <div ng-click="toCashier()" ng-show="shoppingStep"><i class="fa fa-shopping-cart fa-lg"></i> CHECKOUT</div>
+            </div>
+         </div>
+         <div class="main-wrapper unstreched">
+            <div class="products-container" ng-show="shoppingStep">
+               <div class="loader" ng-if="waiting"></div>
+               <product-wrap ng-repeat="product in products" product-data="product" label="'ADD TO CART'" clicky="updateCart" customer="true" numbers="numbers"></product-wrap>
+            </div>
+            <div class="form-container" ng-show="!shoppingStep">
+              <form class="order-form" name="form" novalidate>
+              <h3>Shipping Details <i class="fa fa-cc-visa"></i> <i class="fa fa-cc-mastercard"></i> <i class="fa fa-cc-amex"></i></h3>
+               <div class="form-group">
+                  <div class='input-group date' id='datetimepicker1'>
+                     <input type='text' class="form-control" name="date" placeholder="Pick up a shipping date" ng-model="date" id="date" required>
+                     <span class="input-group-addon">
+                     <span class="glyphicon glyphicon-calendar"></span>
+                     </span>
+                  </div>
+                  <div class="errContainer">
+                     <span class="errBubble" ng-if="dateErr">Can't be blank</span>
+                  </div>
+               </div>
+               <div class="form-group">
+                <label for="city">Shipping city</label>
+                  <input type="text" id="city" name="city" ng-model="city" ng-dblclick="fetchCity()" required ng-class="{'has-error': form.city.$dirty && form.city.$invalid}">
+                  <div class="errContainer">
+                     <span class="errBubble" ng-if="form.city.$dirty && form.city.$invalid">Can't be blank</span>
+                  </div>
+               </div>
+               <div class="form-group">
+                <label for="street">Shipping street</label>
+                  <input type="text" id="street" name="street" ng-model="street" ng-dblclick="fetchStreet()" required ng-class="{'has-error': form.street.$dirty && form.street.$invalid}">
+                  <div class="errContainer">
+                     <span class="errBubble" ng-if="form.street.$dirty && form.street.$invalid">Can't be blank</span>
+                  </div>
+               </div>
+               <div class="form-group">
+                <label for="card">Credit card number</label>
+                  <input type="text" id="card" name='card' ng-model="card" ng-pattern="pattern" required ng-class="{'has-error': form.card.$dirty && form.card.$invalid}">
+                  <div class="errContainer">
+                     <span class="errBubble" ng-if="form.card.$dirty && form.card.$invalid">Please type a valid credit cart number</span>
+                  </div>
+               </div>
+               <div class="total-label">Subtotal: {{cart.totalPrice}} <i class="fa fa-usd"></i></div>
+               <div class="total-label" ng-if="cart.totalPrice < 100">Shipping: 7 <i class="fa fa-usd"></i></div>
+               <div class="total-label" ng-if="cart.totalPrice >= 100">Shipping: 0 <i class="fa fa-usd"></i></div>
+               <div class="total-label" ng-if="cart.totalPrice < 100"><span>Total: </span><span ng-bind="cart.totalPrice + 7"></span><i class="fa fa-usd"></i></div>
+               <div class="total-label" ng-if="cart.totalPrice >= 100"><span>Total: </span><span ng-bind="cart.totalPrice + 0"></span><i class="fa fa-usd"></i></div>
+               <button class="btn btnPush" ng-click="checkout(city, street, card)" ng-disabled="form.card.$invalid || form.street.$invalid || form.city.$invalid">CHECKOUT</button>
+               <p ng-if="orderErr">There was an error submit your order. Please try again later.</p>
+            </form>
+            </div>
+         </div>
+        <popup user="fullName"></popup>
+      </div>
+    </div>
+</body>
+</html>

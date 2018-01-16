@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="app">
+   <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <title>Fresh Direct</title>
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+      <link href="https://fonts.googleapis.com/css?family=Imprima" rel="stylesheet">
+      <link href="https://fonts.googleapis.com/css?family=Delius+Swash+Caps" rel="stylesheet">
+      <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+      <link rel="stylesheet" href="css/login.css">
+      <link rel="icon" type="png" href="https://vignette.wikia.nocookie.net/paradise-bay/images/f/fb/Pineapple.png">
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css">
+      <script type="text/javascript" src="js/app.js"></script>
+      <script type="text/javascript" src="js/controllers/WelcomeController.js"></script>
+      <script type="text/javascript" src="js/directives/validateEqual.js"></script>
+      <script type="text/javascript" src="js/services/SuperService.js"></script>
+      <script type="text/javascript" src="js/filters/filters.js"></script>
+   </head>
+   <body ng-controller="LoginController" ng-cloak>
+      <ul class="navigation-bar">
+        <li><a href="" id="logo">Fresh Direct</a></li>
+        <li ng-if="authorized"><a href=""><i class="fa fa-user-o"></i>{{fullName | capitalize}}</a></li>
+        <li ng-if="authorized"><form action="/logout" method="get"><button type="submit"><i class="fa fa-lock"></i>Log Out</button></form></li>
+      </ul>
+      <div class="loader" ng-if="waiting"></div>
+      <div class="wrap" ng-if="!waiting">
+         <div class="panel login-panel" ng-if="!authorized">
+            <ul class="nav nav-pills">
+               <li class="active topButton">
+                  <a data-toggle="tab" href="#login">SIGN IN</a>
+               </li>
+               <li class="topButton">
+                  <a data-toggle="tab" href="#register">SIGN UP</a>
+               </li>
+            </ul>
+            <div class="tab-content clearfix">
+               <div id="login" class="tab-pane fade in active">
+                  <h1>Welcome Back!</h1>
+                  <form action="/login" method="post" ng-submit="displayLoader($event)" name="form" novalidate>
+                     <div class="form-group group">
+                        <input type="text" name="username" required ng-model="username" ng-class="{'has-error': form.username.$dirty && form.username.$invalid}" placeholder="Username">
+                        <div class="errContainer">
+                           <span class="errBubble" ng-if="form.username.$dirty && form.username.$invalid">Can't be blank</span>
+                        </div>
+                     </div>
+                     <div class="form-group group">
+                        <input type="password" name="password" required ng-model="password" ng-class="{'has-error': form.password.$dirty && form.password.$invalid}" placeholder="Password">
+                        <div class="errContainer">
+                           <span class="errBubble" ng-if="form.password.$dirty && form.password.$invalid">Can't be blank</span>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <button type="submit" ng-disabled="form.password.$invalid || form.username.$invalid" class="btn btnPush">Sign in <i class="fa fa-key"></i></button>
+                        <%if (error){%>
+                        <p><%=error%></p>
+                        <%}%> 
+                     </div>
+                  </form>
+                  <div class="loader login-loader" ng-if="submitted"></div>
+                  <div class="social-buttons">
+                     <form action="/auth/facebook" method="get">
+                        <button type="submit" class="loginBtn loginBtn--facebook">
+                        Login with Facebook
+                        </button>
+                     </form>
+                     <form action="/auth/google" method="get">
+                        <button type="submit" class="loginBtn loginBtn--google">
+                        Login with Google
+                        </button>
+                     </form>
+                  </div>
+               </div>
+               <div id="register" class="tab-pane fade">
+                  <h1>Sign Up for Free</h1>
+                  <form action="/signup" method="post" name="form2" novalidate>
+                     <div ng-hide="register">
+                        <div class="form-group">
+                           <input type="email" placeholder="Email" name="user" required ng-model="user" ng-change="checkUser(user)" ng-model-options="{ debounce: 500}" ng-class="{'has-error': form2.user.$dirty && form2.user.$invalid || userExist}">
+                           <div class="errContainer">
+                              <span class="errBubble" ng-if="form2.user.$dirty && form2.user.$invalid">Please type a valid email</span>
+                              <span class="errBubble" ng-if="userExist">This user is already exist</span>
+                           </div>
+                        </div>
+                        <div class="form-group">
+                           <input type="password" placeholder="Password" name="pass" required ng-model="pass" ng-pattern="pattern" ng-class="{'has-error': form2.pass.$touched && form2.pass.$invalid}">
+                           <div class="errContainer">
+                              <span class="errBubble" ng-if="form2.pass.$invalid && form2.pass.$touched">Type 5 chars, at least 1 letter and 1 digit</span>
+                           </div>
+                        </div>
+                        <div class="form-group">
+                           <input type="password" placeholder="Confirm password" name="password_confirm" ng-model="password_confirm" required validate-equals="pass" ng-class="{'has-error': form2.password_confirm.$dirty && form2.password_confirm.$invalid}">
+                           <div class="errContainer">
+                              <span class="errBubble" ng-if="form2.password_confirm.$dirty && form2.password_confirm.$invalid">Please match the Passwords</span>
+                           </div>
+                        </div>
+                        <div class="form-group">
+                           <button ng-click="toggleSteps()" ng-disabled="form2.user.$invalid || form2.pass.$invalid || form2.password_confirm.$invalid || userExist" class="btn btnPush pull-right" type="button" id="next"><i class="fa fa-long-arrow-right" aria-hidden="true"></i></button>
+                        </div>
+                     </div>
+                     <div ng-if="register">
+                        <div class="form-group">
+                           <select ng-model="city">
+                              <option value="" disabled selected>City</option>
+                              <option value="{{city}}" ng-repeat="city in cities">{{city | capitalize}}</option>
+                           </select>
+                        </div>
+                        <div class="form-group">
+                           <input type="text" placeholder="Street" name="street" ng-model="street">
+                        </div>
+                        <div class="form-group">
+                           <input type="text" placeholder="first name" name="firstName" ng-model="firstName" required ng-class="{'has-error': form2.firstName.$dirty && form2.firstName.$invalid}">
+                           <div class="errContainer">
+                              <span class="errBubble" ng-if="form2.firstName.$dirty && form2.firstName.$invalid">Can't be blank</span>
+                           </div>
+                        </div>
+                        <div class="form-group">
+                           <input type="text" placeholder="last name" name="lastName" ng-model="lastName" required ng-class="{'has-error': form2.lastName.$dirty && form2.lastName.$invalid}">
+                           <div class="errContainer">
+                              <span class="errBubble" ng-if="form2.lastName.$dirty && form2.lastName.$invalid">Can't be blank</span>
+                           </div>
+                        </div>
+                        <div class="form-group">
+                           <button ng-click="toggleSteps()" class="btn btnPush" type="button" id="back"><i class="fa fa-long-arrow-left" aria-hidden="true"></i></button>
+                           <button type="submit" class="btn btnPush pull-right" ng-disabled="form2.lastName.$invalid || form2.firstName.$invalid">Create An Account</button>
+                        </div>
+                     </div>
+                  </form>
+               </div>
+            </div>
+         </div>
+         <div class="panel user-panel" ng-if="authorized">
+            <h1>Welcome, {{fullName | capitalize}}</h1>
+            <h4 ng-if="openCart">You have ${{openCart.totalPrice}} worth of products in your cart from {{openCart.createdOn | date}}. Click to continue shopping.</h4>
+            <h4 ng-if="lastOrder">Your last order for ${{lastOrder.cart.totalPrice}} was submitted on {{lastOrder.orderDate | date}}. Click to start a new purchase.</h4>
+            <h4 ng-if="!openCart && !lastOrder">Welcome to your first shopping.</h4>
+            <button class="btn btnPush animated pulse" ng-click="shopping()">{{shoppingStatus}}</button>
+         </div>
+         <div class="panel store-panel">
+            <section>
+               <p>Free shipping on purchases over $ 100</p>
+            </section>
+            <h1>Fresh Direct</h1>
+            <h4>Simple, Easy, Quick.</h4>
+            <div>
+               <div class="inner-cube">
+                  <span>step 1</span>
+                  <img src="images/store.png">
+                  <p>Browse our store and fill up the cart with whatever you want</p>
+               </div>
+               <div class="inner-cube">
+                  <span>step 2</span>
+                  <img src="images/track.png">
+                  <p>Choose a shipping date</p>
+               </div>
+               <div class="inner-cube">
+                  <span>step 3</span>
+                  <img src="images/pay.png">
+                  <p>Pay quickly and easily</p>
+               </div>
+            </div>
+            <p class="slider"><span class="glyphicon glyphicon-apple"></span> products: {{superData.products}}</p>
+            <p class="slider"><i class="fa fa-truck"></i> orders: {{superData.orders}}</p>
+         </div>
+      </div>
+   </body>
+</html>

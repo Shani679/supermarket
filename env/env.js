@@ -1,0 +1,10 @@
+process.env.SECRET_SESSION_KEY = process.env.SECRET_SESSION_KEY  || 'shani123';
+process.env.COOKIE_KEY_NAME = process.env.COOKIE_KEY_NAME || 'supermarket_cook';
+process.env.CONNECTION_STRING = process.env.CONNECTION_STRING || 'mongodb://shani-countries:123456@ds125365.mlab.com:25365/countries';
+process.env.FACEBOOK_CLIENT_ID = process.env.FACEBOOK_CLIENT_ID || '129821347716051';
+process.env.FACEBOOK_SECRET_KEY = process.env.FACEBOOK_CLIENT_SECRET || '1090402e0b666ca9d5f8f21abdb815f2';
+process.env.FACEBOOK_CB_URL = process.env.FACEBOOK_CB_URL || "http://localhost:3000/auth/facebook/callback";
+process.env.GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '53072264518-3r15io0aomiju94h22a7tfrk438bkiou.apps.googleusercontent.com';
+process.env.GOOGLE_SECRET_KEY = process.env.GOOGLE_SECRET_KEY || 'b71srOKGUwjt_h6dyc_krSSg';
+process.env.GOOGLE_CB_URL = process.env.GOOGLE_CB_URL || "/auth/google/callback";
+process.env.UPLOAD_ERROR = process.env.UPLOAD_ERROR || 'No files were uploaded.';
